@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   // RETURN AN ARRAY WITH ALL THE USERS
   Users.get()
     .then( users => {
-      res.status( 200 ).json( { users } )
+      res.status( 200 ).json( users )
     })
     .catch( () => {
       res.status( 500 ).json({
@@ -28,17 +28,18 @@ router.get('/:id', Middleware.validateUserId, (req, res) => {
   res.status( 200 ).json( req.user );
 });
 
-router.post('/', Middleware.validateUser, (req, res) => {
+router.post('/', Middleware.validateUser, (req, res, next) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
   Users.insert( req.body )
     .then( user => {
-      res.status( 201 ).json( user )
+      res.status( 200 ).json( user )
     })
     .catch( () => {
       res.status( 500 ).json({
         error: "Could not create a new user."
       })
+      next()
     })
 });
 
@@ -69,7 +70,7 @@ router.delete('/:id', Middleware.validateUserId, (req, res) => {
     })
 });
 
-router.get('/:id/posts', Middleware.validateUserId, (req, res) => {
+router.get('/:id/posts', Middleware.validateUserId, (req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
   Users.getUserPosts( req.user.id )
@@ -78,22 +79,25 @@ router.get('/:id/posts', Middleware.validateUserId, (req, res) => {
     })
     .catch( err => {
       res.status( 500 ).json( err );
+      next();
     })
+
 });
 
-router.post('/:id/posts', Middleware.validateUserId, Middleware.validatePost, (req, res) => {
+router.post('/:id/posts', Middleware.validateUserId, Middleware.validatePost, (req, res, next) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
   Posts.insert({
     ...req.body,
-    user_id: req.params.id
+    id: req.params.id
   })
   .then( post => {
-    res.status( 201 ).json( post )
+    res.status( 200 ).json( post )
   })
   .catch( err => {
     res.status( 500 ).json( err );
+    next( err )
   })
 });
 
