@@ -10,7 +10,7 @@ server.use( logger );
 // global middlewares and the user's router need to be connected here
 const userRouter = require('./users/users-router');
 
-server.use('/api/users/'. userRouter);
+server.use('/api/users/', userRouter);
 
 server.get('/', (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
